@@ -3,6 +3,7 @@ import { Grid, Button, Paper } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 
 import { INode } from '@/common';
+import NodeListItem from '../NodeListItem/NodeListItem';
 
 interface NodeListProps {
   nodes: INode[];
@@ -19,14 +20,7 @@ const NodeList: React.FC<NodeListProps> = (props) => {
     >
       {props.nodes.map((node) => (
         <Grid item xs={2} sm={4} md={4} key={node.id}>
-          <Paper
-            style={{
-              backgroundColor: '#fff',
-              padding: 16,
-            }}
-          >
-            {node.name}
-          </Paper>
+          <NodeListItem node={node} />
         </Grid>
       ))}
       <Grid item xs={2} sm={4} md={4}>
