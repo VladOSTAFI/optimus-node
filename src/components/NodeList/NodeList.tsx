@@ -2,8 +2,10 @@ import React from 'react';
 import { Grid, Button, Paper } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 
+import { INode } from '@/common';
+
 interface NodeListProps {
-  nodes: any[];
+  nodes: INode[];
 
   onAddNode?: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
@@ -30,7 +32,7 @@ const NodeList: React.FC<NodeListProps> = (props) => {
       <Grid item xs={2} sm={4} md={4}>
         <Button
           onClick={props.onAddNode}
-          variant="contained"
+          variant="outlined"
           startIcon={<AddCircleIcon />}
         >
           Add Node

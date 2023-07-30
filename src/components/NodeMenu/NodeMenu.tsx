@@ -1,12 +1,17 @@
 import React from 'react';
 import { Menu, MenuItem } from '@mui/material';
 
+import { PROJECTS, ProjectIds } from '@/common';
+
+const DISABLED_NODES = [
+  ProjectIds.Gear,
+  ProjectIds.Holograph,
+  ProjectIds.Shardeum,
+];
+
 interface NodeMenuProps
   extends Omit<React.ComponentProps<typeof Menu>, 'onSelect'> {
-  nodes: any[];
-  disabledNodes?: string[];
-
-  onSelect: (id: string) => void;
+  onSelect: (id: ProjectIds) => void;
 }
 
 const NodeMenu: React.FC<NodeMenuProps> = (props) => {
@@ -19,13 +24,13 @@ const NodeMenu: React.FC<NodeMenuProps> = (props) => {
         'aria-labelledby': 'basic-button',
       }}
     >
-      {props.nodes.map((node) => (
+      {PROJECTS.map((project) => (
         <MenuItem
-          key={node.id}
-          onClick={() => props.onSelect(node.id)}
-          disabled={props.disabledNodes?.includes(node.id)}
+          key={project.id}
+          onClick={() => props.onSelect(project.id)}
+          disabled={DISABLED_NODES.includes(project.id)}
         >
-          {node.name}
+          {project.name}
         </MenuItem>
       ))}
     </Menu>

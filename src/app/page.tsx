@@ -5,37 +5,45 @@ import {
   Alert,
   AppBar,
   Box,
+  Button,
   CssBaseline,
   Drawer,
   Snackbar,
   Toolbar,
   Typography,
 } from '@mui/material';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 
-import { AddNodeModal, NodeList, ServerList } from '@/components';
-import NodeMenu from '../components/NodeMenu/NodeMenu';
-
-const DRAWER_WIDTH = 240;
-const SERVER_LIST = [
-  { id: '1', name: 'Main VPS' },
-  { id: '2', name: 'My VPS' },
-  { id: '3', name: 'Contabo L' },
-];
-const NODE_LIST = [
-  { id: '1', name: 'Subspace' },
-  { id: '2', name: 'Holograph' },
-  { id: '3', name: 'Massa' },
-];
+import {
+  AddNodeModal,
+  AddServerModal,
+  NodeList,
+  NodeMenu,
+  ServerList,
+} from '@/components';
+import {
+  DRAWER_WIDTH,
+  INode,
+  IServer,
+  NODE_LIST,
+  ProjectIds,
+  SERVER_LIST,
+} from '@/common';
 
 const Home = () => {
-  const [selectedServer, setSelectedServer] = useState<string | undefined>(
-    SERVER_LIST[0].id || undefined,
+  const [servers, setServers] = useState(SERVER_LIST);
+  const [nodes, setNodes] = useState(NODE_LIST);
+  const [selectedServerId, setSelectedServerId] = useState<string | undefined>(
+    SERVER_LIST[0]?.id || undefined,
   );
   const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | undefined>(
     undefined,
   );
-  const [nodeToAdd, setNodeToAdd] = useState<any | undefined>(undefined);
-  const [showSuccessTooltip, setShowSuccessTooltip] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState<
+    ProjectIds | undefined
+  >(undefined);
+  const [successTooltipMsg, setSuccessTooltipMsg] = useState('');
+  const [showAddServerModal, setShowAddServerModal] = useState(false);
 
   const handleOpenNodeMenu = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -44,15 +52,41 @@ const Home = () => {
     [],
   );
 
-  const handleSelectNode = useCallback((id: string) => {
-    setNodeToAdd(NODE_LIST.find((node) => node.id === id));
-    setMenuAnchorEl(undefined);
-  }, []);
+  const handleSelectNode = useCallback(
+    (id: ProjectIds) => {
+      setSelectedProjectId(id);
+      setMenuAnchorEl(undefined);
+    },
+    [nodes],
+  );
 
-  const handleAddNode = useCallback((data: any) => {
-    console.log('New node', data);
+  const handleAddNode = useCallback(
+    ({ nodeName, ...data }: Record<string, string>) => {
+      if (!selectedProjectId || !selectedServerId) return;
 
-    setShowSuccessTooltip(true);
+      const nodeData: Omit<INode, 'id'> = {
+        name: nodeName,
+        projectId: selectedProjectId,
+        serverId: selectedServerId,
+        data,
+      };
+      setNodes((prevNodes) => [
+        ...prevNodes,
+        { id: `${Date.now()}`, ...nodeData },
+      ]);
+
+      setSuccessTooltipMsg('Node has been added successfully.');
+    },
+    [selectedProjectId, selectedServerId],
+  );
+
+  const handleAddServer = useCallback((data: Omit<IServer, 'id'>) => {
+    setServers((prevServers) => [
+      ...prevServers,
+      { id: `${Date.now()}`, ...data },
+    ]);
+
+    setSuccessTooltipMsg('Server has been added successfully.');
   }, []);
 
   return (
@@ -80,25 +114,33 @@ const Home = () => {
         }}
       >
         <Toolbar />
+        <Box sx={{ display: 'flex', justifyContent: 'center', paddingTop: 1 }}>
+          <Button
+            variant="outlined"
+            startIcon={<AddCircleIcon />}
+            onClick={() => setShowAddServerModal(true)}
+          >
+            Add server
+          </Button>
+        </Box>
+
         <Box
           sx={{ overflow: 'auto', display: 'flex', flexDirection: 'column' }}
         >
           <ServerList
-            servers={SERVER_LIST}
-            selectedId={selectedServer}
-            onSelect={setSelectedServer}
+            servers={servers}
+            selectedId={selectedServerId}
+            onSelect={setSelectedServerId}
           />
         </Box>
       </Drawer>
 
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
-        <NodeList nodes={NODE_LIST} onAddNode={handleOpenNodeMenu} />
+        <NodeList nodes={nodes} onAddNode={handleOpenNodeMenu} />
       </Box>
 
       <NodeMenu
-        nodes={NODE_LIST}
-        disabledNodes={[NODE_LIST[1].id, NODE_LIST[2].id]}
         anchorEl={menuAnchorEl}
         open={!!menuAnchorEl}
         onSelect={handleSelectNode}
@@ -106,19 +148,24 @@ const Home = () => {
       />
 
       <AddNodeModal
-        node={nodeToAdd}
-        open={!!nodeToAdd}
-        onClose={() => setNodeToAdd(undefined)}
+        open={!!selectedProjectId}
+        onClose={() => setSelectedProjectId(undefined)}
         onAdd={handleAddNode}
       />
 
+      <AddServerModal
+        open={showAddServerModal}
+        onClose={() => setShowAddServerModal(false)}
+        onAdd={handleAddServer}
+      />
+
       <Snackbar
-        open={showSuccessTooltip}
+        open={!!successTooltipMsg}
         autoHideDuration={4000}
-        onClose={() => setShowSuccessTooltip(false)}
+        onClose={() => setSuccessTooltipMsg('')}
       >
         <Alert severity="success" sx={{ width: '100%' }}>
-          Node has been added successfully.
+          {successTooltipMsg}
         </Alert>
       </Snackbar>
     </Box>

@@ -2,19 +2,20 @@ import React, { useCallback, useState } from 'react';
 import { TextField } from '@mui/material';
 
 import { BaseModal } from '@/components';
+import { IServer } from '@/common';
 
-interface AddNodeModalProps {
+interface AddServerModalProps {
   open: boolean;
 
   onClose: () => void;
-  onAdd: (data: any) => void;
+  onAdd: (data: Omit<IServer, 'id'>) => void;
 }
 
-const AddNodeModal: React.FC<AddNodeModalProps> = (props) => {
+const AddServerModal: React.FC<AddServerModalProps> = (props) => {
   const [formData, setFormData] = useState({});
 
   const handleSubmit = useCallback(() => {
-    props.onAdd(formData);
+    props.onAdd(formData as Omit<IServer, 'id'>);
 
     props.onClose();
   }, [formData, props.onClose]);
@@ -38,7 +39,7 @@ const AddNodeModal: React.FC<AddNodeModalProps> = (props) => {
 
   return (
     <BaseModal
-      title="Add node to the server"
+      title="Add new server"
       open={props.open}
       onClose={props.onClose}
       onSubmit={handleSubmit}
@@ -47,18 +48,8 @@ const AddNodeModal: React.FC<AddNodeModalProps> = (props) => {
       <TextField
         autoFocus
         margin="dense"
-        name="nodeName"
-        label="Node name"
-        type="text"
-        fullWidth
-        variant="standard"
-        required
-        onChange={handleChange}
-      />
-      <TextField
-        margin="dense"
         name="name"
-        label="Node name(in telemetry)"
+        label="Server name"
         type="text"
         fullWidth
         variant="standard"
@@ -67,8 +58,28 @@ const AddNodeModal: React.FC<AddNodeModalProps> = (props) => {
       />
       <TextField
         margin="dense"
-        name="address"
-        label="Wallet address"
+        name="ip"
+        label="IP"
+        type="text"
+        fullWidth
+        variant="standard"
+        required
+        onChange={handleChange}
+      />
+      <TextField
+        margin="dense"
+        name="username"
+        label="Username"
+        type="text"
+        fullWidth
+        variant="standard"
+        required
+        onChange={handleChange}
+      />
+      <TextField
+        margin="dense"
+        name="password"
+        label="Password"
         type="text"
         fullWidth
         variant="standard"
@@ -79,4 +90,4 @@ const AddNodeModal: React.FC<AddNodeModalProps> = (props) => {
   );
 };
 
-export default AddNodeModal;
+export default AddServerModal;
