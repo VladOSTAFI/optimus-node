@@ -57,7 +57,7 @@ export const POST = async (req: Request) => {
       data: nodeData.data,
     });
 
-    return NextResponse.json({ data: formatNodeData(node) });
+    return NextResponse.json({ data: formatNodeData(node) }, { status: 201 });
   } catch (e) {
     console.log(e);
 

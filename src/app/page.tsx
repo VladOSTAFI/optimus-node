@@ -31,6 +31,7 @@ const Home = () => {
     isInitServers,
     fetchServers,
     createServer,
+    deleteServer,
   } = useServer();
   const { nodes, fetchServerNodes, createNode } = useNode();
 
@@ -83,6 +84,15 @@ const Home = () => {
       await createServer(data);
 
       setSuccessTooltipMsg('Server has been added successfully.');
+    },
+    [createServer],
+  );
+
+  const handleDeleteServer = useCallback(
+    async (id: string) => {
+      await deleteServer(id);
+
+      setSuccessTooltipMsg('Server has been deleted.');
     },
     [createServer],
   );
@@ -141,6 +151,7 @@ const Home = () => {
             servers={servers}
             selectedId={selectedServerId}
             onSelect={setSelectedServerId}
+            onDelete={handleDeleteServer}
           />
         </Box>
       </Drawer>
@@ -170,6 +181,7 @@ const Home = () => {
       />
 
       <Snackbar
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         open={!!successTooltipMsg}
         autoHideDuration={4000}
         onClose={() => setSuccessTooltipMsg('')}

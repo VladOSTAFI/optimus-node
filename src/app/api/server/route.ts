@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { connectToDatabase } from '@/utils';
-import { IDBServer, Server } from '@/models';
+import { IDBServer, Node, Server } from '@/models';
 import { IServer } from '@/common';
 
 connectToDatabase();
@@ -36,7 +36,10 @@ export const POST = async (req: Request) => {
   try {
     const server = await Server.create(serverData);
 
-    return NextResponse.json({ data: formatServerData(server) });
+    return NextResponse.json(
+      { data: formatServerData(server) },
+      { status: 201 },
+    );
   } catch (e) {
     console.log(e);
 
@@ -45,4 +48,20 @@ export const POST = async (req: Request) => {
       { status: 500 },
     );
   }
+};
+
+export const DELETE = async (req: Request) => {
+  const body = await req.json();
+
+  if (!body.serverId) {
+    return NextResponse.json(
+      { message: 'Server ID should be specified.' },
+      { status: 400 },
+    );
+  }
+
+  await Server.findByIdAndRemove(body.serverId);
+  await Node.deleteMany({ server: body.serverId });
+
+  return NextResponse.json(null);
 };

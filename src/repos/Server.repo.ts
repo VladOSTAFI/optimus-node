@@ -16,4 +16,11 @@ export class ServerRepo {
 
     return data as IServer;
   }
+
+  static async delete(serverId: string) {
+    await fetch('/api/server', {
+      method: 'DELETE',
+      body: JSON.stringify({ serverId }),
+    });
+  }
 }

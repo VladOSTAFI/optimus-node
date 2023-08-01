@@ -23,6 +23,14 @@ export const useServer = () => {
     setServers((prevServers) => [...prevServers, server]);
   }, []);
 
+  const deleteServer = useCallback(async (id: string) => {
+    await ServerRepo.delete(id);
+
+    setServers((prevServers) =>
+      prevServers.filter((server) => server.id !== id),
+    );
+  }, []);
+
   return useMemo(
     () => ({
       servers,
@@ -30,7 +38,15 @@ export const useServer = () => {
       isFetchingServers,
       fetchServers,
       createServer,
+      deleteServer,
     }),
-    [servers, isInitServers, isFetchingServers, fetchServers, createServer],
+    [
+      servers,
+      isInitServers,
+      isFetchingServers,
+      fetchServers,
+      createServer,
+      deleteServer,
+    ],
   );
 };
