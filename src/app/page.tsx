@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Alert,
   AppBar,
@@ -21,20 +21,21 @@ import {
   NodeMenu,
   ServerList,
 } from '@/components';
-import {
-  DRAWER_WIDTH,
-  INode,
-  IServer,
-  NODE_LIST,
-  ProjectIds,
-  SERVER_LIST,
-} from '@/common';
+import { DRAWER_WIDTH, INode, IServer, ProjectIds } from '@/common';
+import { useNode, useServer } from '@/hooks';
 
 const Home = () => {
-  const [servers, setServers] = useState(SERVER_LIST);
-  const [nodes, setNodes] = useState(NODE_LIST);
+  const {
+    servers,
+    isFetchingServers,
+    isInitServers,
+    fetchServers,
+    createServer,
+  } = useServer();
+  const { nodes, fetchServerNodes, createNode } = useNode();
+
   const [selectedServerId, setSelectedServerId] = useState<string | undefined>(
-    SERVER_LIST[0]?.id || undefined,
+    undefined,
   );
   const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | undefined>(
     undefined,
@@ -61,7 +62,7 @@ const Home = () => {
   );
 
   const handleAddNode = useCallback(
-    ({ nodeName, ...data }: Record<string, string>) => {
+    async ({ nodeName, ...data }: Record<string, string>) => {
       if (!selectedProjectId || !selectedServerId) return;
 
       const nodeData: Omit<INode, 'id'> = {
@@ -70,24 +71,33 @@ const Home = () => {
         serverId: selectedServerId,
         data,
       };
-      setNodes((prevNodes) => [
-        ...prevNodes,
-        { id: `${Date.now()}`, ...nodeData },
-      ]);
+      await createNode(nodeData);
 
       setSuccessTooltipMsg('Node has been added successfully.');
     },
     [selectedProjectId, selectedServerId],
   );
 
-  const handleAddServer = useCallback((data: Omit<IServer, 'id'>) => {
-    setServers((prevServers) => [
-      ...prevServers,
-      { id: `${Date.now()}`, ...data },
-    ]);
+  const handleAddServer = useCallback(
+    async (data: Omit<IServer, 'id'>) => {
+      await createServer(data);
 
-    setSuccessTooltipMsg('Server has been added successfully.');
-  }, []);
+      setSuccessTooltipMsg('Server has been added successfully.');
+    },
+    [createServer],
+  );
+
+  useEffect(() => {
+    if (isInitServers && !isFetchingServers) {
+      fetchServers();
+    }
+  }, [isInitServers, isFetchingServers]);
+
+  useEffect(() => {
+    if (selectedServerId) {
+      fetchServerNodes(selectedServerId);
+    }
+  }, [selectedServerId]);
 
   return (
     <Box sx={{ display: 'flex' }} id="page">
