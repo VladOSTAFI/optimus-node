@@ -3,6 +3,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { connectToDatabase } from '@/utils';
 import { IDBNode, Node, Server } from '@/models';
 import { INode } from '@/common';
+import { NodesRegistryService } from '@/services';
 
 connectToDatabase();
 
@@ -56,6 +57,18 @@ export const POST = async (req: Request) => {
       server: server._id,
       data: nodeData.data,
     });
+
+    const config = {
+      host: server.ip,
+      port: 22,
+      username: server.username,
+      password: server.password,
+    };
+
+    const NodeService = NodesRegistryService.getNodeService(node.projectId);
+    const nodeService = new NodeService(config);
+
+    await nodeService.install();
 
     return NextResponse.json({ data: formatNodeData(node) }, { status: 201 });
   } catch (e) {

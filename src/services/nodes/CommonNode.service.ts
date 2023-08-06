@@ -22,13 +22,13 @@ export class CommonNodeService implements IAbstractNodeService {
 
   async restart() {}
 
-  async run() {};
+  async run() {}
 
-  async stop() {};
+  async stop() {}
 
-  async install() {};
+  async install(...args: any) {}
 
-  async delete() {};
+  async delete() {}
 }
 
 export interface IAbstractNodeService {
