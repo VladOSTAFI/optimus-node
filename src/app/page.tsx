@@ -33,7 +33,7 @@ const Home = () => {
     createServer,
     deleteServer,
   } = useServer();
-  const { nodes, fetchServerNodes, createNode } = useNode();
+  const { nodes, isFetchingNodes, fetchServerNodes, createNode } = useNode();
 
   const [selectedServerId, setSelectedServerId] = useState<string | undefined>(
     undefined,
@@ -54,13 +54,10 @@ const Home = () => {
     [],
   );
 
-  const handleSelectNode = useCallback(
-    (id: ProjectIds) => {
-      setSelectedProjectId(id);
-      setMenuAnchorEl(undefined);
-    },
-    [nodes],
-  );
+  const handleSelectNode = useCallback((id: ProjectIds) => {
+    setSelectedProjectId(id);
+    setMenuAnchorEl(undefined);
+  }, []);
 
   const handleAddNode = useCallback(
     async ({ nodeName, ...data }: Record<string, string>) => {
@@ -76,7 +73,7 @@ const Home = () => {
 
       setSuccessTooltipMsg('Node has been added successfully.');
     },
-    [selectedProjectId, selectedServerId],
+    [selectedProjectId, selectedServerId, createNode],
   );
 
   const handleAddServer = useCallback(
@@ -94,7 +91,7 @@ const Home = () => {
 
       setSuccessTooltipMsg('Server has been deleted.');
     },
-    [createServer],
+    [deleteServer],
   );
 
   useEffect(() => {
@@ -148,6 +145,7 @@ const Home = () => {
           sx={{ overflow: 'auto', display: 'flex', flexDirection: 'column' }}
         >
           <ServerList
+            loading={isInitServers || isFetchingServers}
             servers={servers}
             selectedId={selectedServerId}
             onSelect={setSelectedServerId}
@@ -158,7 +156,12 @@ const Home = () => {
 
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
-        <NodeList nodes={nodes} onAddNode={handleOpenNodeMenu} />
+        <NodeList
+          loading={isFetchingNodes}
+          isServerSelected={!!selectedServerId}
+          nodes={nodes}
+          onAddNode={handleOpenNodeMenu}
+        />
       </Box>
 
       <NodeMenu

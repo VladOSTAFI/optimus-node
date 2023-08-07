@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, Button, Paper } from '@mui/material';
+import { Grid, Button, CircularProgress, Box, Typography } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 
 import { INode } from '@/common';
@@ -7,11 +7,48 @@ import NodeListItem from '../NodeListItem/NodeListItem';
 
 interface NodeListProps {
   nodes: INode[];
+  loading?: boolean;
+  isServerSelected?: boolean;
 
   onAddNode?: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 const NodeList: React.FC<NodeListProps> = (props) => {
+  if (props.loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', paddingTop: 5 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (props.nodes.length === 0) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        {props.isServerSelected ? (
+          <>
+            <Typography variant="h6" sx={{ marginBottom: 2 }}>No nodes in current server</Typography>
+            <Button
+              onClick={props.onAddNode}
+              variant="outlined"
+              startIcon={<AddCircleIcon />}
+            >
+              Add Node
+            </Button>
+          </>
+        ) : (
+          <Typography variant="h6">Select server from server list</Typography>
+        )}
+      </Box>
+    );
+  }
+
   return (
     <Grid
       container
