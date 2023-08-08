@@ -1,6 +1,6 @@
 import mongoose, { Document, model, Model, Schema } from 'mongoose';
 
-import { INode, ProjectIds } from '@/common';
+import { INode, NodeStatuses, ProjectIds } from '@/common';
 import { IDBServer } from '@/models/Server';
 
 export interface IDBNode extends Omit<INode, 'id' | 'serverId'>, Document {
@@ -20,6 +20,11 @@ const NodeSchema: Schema = new Schema({
   server: {
     type: Schema.Types.ObjectId,
     ref: 'Server',
+    required: true,
+  },
+  status: {
+    type: String,
+    enum: Object.values(NodeStatuses),
     required: true,
   },
   data: {

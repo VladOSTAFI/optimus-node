@@ -18,7 +18,12 @@ export const useNode = () => {
     setIsFetchingNodes(false);
   }, []);
 
-  const createNode = useCallback(async (data: Omit<INode, 'id'>) => {
+  const refetchServerNodes = useCallback(async (serverId: string) => {
+    const nodes = await NodeRepo.find({ server: serverId });
+    setNodes(nodes);
+  }, []);
+
+  const createNode = useCallback(async (data: Omit<INode, 'id' | 'status'>) => {
     const node = await NodeRepo.create(data);
     setNodes((prevNodes) => [...prevNodes, node]);
   }, []);
@@ -29,8 +34,16 @@ export const useNode = () => {
       isInitNodes,
       isFetchingNodes,
       fetchServerNodes,
+      refetchServerNodes,
       createNode,
     }),
-    [nodes, isInitNodes, isFetchingNodes, fetchServerNodes, createNode],
+    [
+      nodes,
+      isInitNodes,
+      isFetchingNodes,
+      fetchServerNodes,
+      refetchServerNodes,
+      createNode,
+    ],
   );
 };

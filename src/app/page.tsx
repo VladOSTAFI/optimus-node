@@ -33,7 +33,14 @@ const Home = () => {
     createServer,
     deleteServer,
   } = useServer();
-  const { nodes, isFetchingNodes, fetchServerNodes, createNode } = useNode();
+  const {
+    nodes,
+    isInitNodes,
+    isFetchingNodes,
+    fetchServerNodes,
+    refetchServerNodes,
+    createNode,
+  } = useNode();
 
   const [selectedServerId, setSelectedServerId] = useState<string | undefined>(
     undefined,
@@ -63,7 +70,7 @@ const Home = () => {
     async ({ nodeName, ...data }: Record<string, string>) => {
       if (!selectedProjectId || !selectedServerId) return;
 
-      const nodeData: Omit<INode, 'id'> = {
+      const nodeData: Omit<INode, 'id' | 'status'> = {
         name: nodeName,
         projectId: selectedProjectId,
         serverId: selectedServerId,
@@ -105,6 +112,18 @@ const Home = () => {
       fetchServerNodes(selectedServerId);
     }
   }, [selectedServerId]);
+
+  useEffect(() => {
+    if (!selectedServerId || isFetchingNodes || isInitNodes) return;
+
+    const intervalId = setInterval(() => {
+      refetchServerNodes(selectedServerId);
+    }, 3000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [selectedServerId, isFetchingNodes, isInitNodes]);
 
   return (
     <Box sx={{ display: 'flex' }} id="page">

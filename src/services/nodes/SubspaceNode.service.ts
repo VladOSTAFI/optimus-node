@@ -1,4 +1,6 @@
 import { CommonNodeService, Config } from '@/services/nodes/CommonNode.service';
+import { IDBNode, Node } from '@/models';
+import { NodeStatuses } from '@/common';
 
 export class SubspaceNodeService extends CommonNodeService {
   private readonly RELEASE = 'gemini-3e';
@@ -70,13 +72,18 @@ export class SubspaceNodeService extends CommonNodeService {
     }
   }
 
-  async install(nodeName: string, walletAddress: string) {
+  async install(node: IDBNode) {
     try {
       await this.sshClient.connect(this.config);
 
-      await this.createDockerCompose(nodeName, walletAddress);
+      await this.createDockerCompose(
+        node.data.nodeName,
+        node.data.walletAddress,
+      );
 
       await this.sshClient.runCommand('ls');
+
+      await this.updateNodeStatus(node._id);
     } catch (err) {
       console.error('Error[SubspaceNodeService.install]', err);
     } finally {
@@ -98,6 +105,13 @@ export class SubspaceNodeService extends CommonNodeService {
     } finally {
       await this.sshClient.close();
     }
+  }
+
+  private async updateNodeStatus(nodeId: IDBNode['id']) {
+    await Node.findOneAndUpdate(
+      { _id: nodeId },
+      { status: NodeStatuses.INSTALLED },
+    );
   }
 
   private async createDockerCompose(nodeName: string, walletAddress: string) {

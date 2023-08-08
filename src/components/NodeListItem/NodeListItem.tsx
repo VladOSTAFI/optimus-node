@@ -28,6 +28,9 @@ const NodeListItem: React.FC<NodeListItemProps> = (props) => {
         <Typography variant="h5" component="div">
           {props.node.name}
         </Typography>
+        <Typography variant="caption" component="span">
+          Node status: {props.node.status}
+        </Typography>
       </CardContent>
       <CardActions>
         <Button size="small">Update</Button>

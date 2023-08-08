@@ -67,7 +67,7 @@ const AddNodeModal: React.FC<AddNodeModalProps> = (props) => {
       />
       <TextField
         margin="dense"
-        name="address"
+        name="walletAddress"
         label="Wallet address"
         type="text"
         fullWidth

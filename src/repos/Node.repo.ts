@@ -10,7 +10,7 @@ export class NodeRepo {
     return data as INode[];
   }
 
-  static async create(body: Omit<INode, 'id'>) {
+  static async create(body: Omit<INode, 'id' | 'status'>) {
     const res = await fetch('/api/node', {
       method: 'POST',
       body: JSON.stringify(body),

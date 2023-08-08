@@ -2,7 +2,7 @@ import { NextResponse, NextRequest } from 'next/server';
 
 import { connectToDatabase } from '@/utils';
 import { IDBNode, Node, Server } from '@/models';
-import { INode } from '@/common';
+import { INode, NodeStatuses } from '@/common';
 import { NodesRegistryService } from '@/services';
 
 connectToDatabase();
@@ -12,6 +12,7 @@ const formatNodeData = (rawServerData: IDBNode): INode => ({
   name: rawServerData.name,
   projectId: rawServerData.projectId,
   serverId: rawServerData.server.id,
+  status: rawServerData.status,
   data: rawServerData.data,
 });
 
@@ -55,6 +56,7 @@ export const POST = async (req: Request) => {
       name: nodeData.name,
       projectId: nodeData.projectId,
       server: server._id,
+      status: NodeStatuses.INSTALLATION,
       data: nodeData.data,
     });
 
@@ -68,7 +70,7 @@ export const POST = async (req: Request) => {
     const NodeService = NodesRegistryService.getNodeService(node.projectId);
     const nodeService = new NodeService(config);
 
-    await nodeService.install();
+    nodeService.install(node);
 
     return NextResponse.json({ data: formatNodeData(node) }, { status: 201 });
   } catch (e) {
