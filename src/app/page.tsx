@@ -40,6 +40,8 @@ const Home = () => {
     fetchServerNodes,
     refetchServerNodes,
     createNode,
+    runNode,
+    deleteNode,
   } = useNode();
 
   const [selectedServerId, setSelectedServerId] = useState<string | undefined>(
@@ -180,6 +182,8 @@ const Home = () => {
           isServerSelected={!!selectedServerId}
           nodes={nodes}
           onAddNode={handleOpenNodeMenu}
+          onRunNode={runNode}
+          onDeleteNode={deleteNode}
         />
       </Box>
 

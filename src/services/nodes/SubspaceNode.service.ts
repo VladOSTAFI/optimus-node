@@ -1,5 +1,5 @@
 import { CommonNodeService, Config } from '@/services/nodes/CommonNode.service';
-import { IDBNode, Node } from '@/models';
+import { Node } from '@/models';
 import { NodeStatuses } from '@/common';
 
 export class SubspaceNodeService extends CommonNodeService {
@@ -39,6 +39,8 @@ export class SubspaceNodeService extends CommonNodeService {
       );
     } catch (err) {
       console.error('Error[SubspaceNodeService.restart]', err);
+
+      await this.updateNodeStatus(NodeStatuses.FAILED);
     } finally {
       await this.sshClient.close();
     }
@@ -51,8 +53,12 @@ export class SubspaceNodeService extends CommonNodeService {
       await this.sshClient.runCommand(
         `docker-compose -f $HOME/${this.DIR_NAME}/docker-compose.yml up -d`,
       );
+
+      await this.updateNodeStatus(NodeStatuses.RUN);
     } catch (err) {
       console.error('Error[SubspaceNodeService.run]', err);
+
+      await this.updateNodeStatus(NodeStatuses.FAILED);
     } finally {
       await this.sshClient.close();
     }
@@ -65,27 +71,30 @@ export class SubspaceNodeService extends CommonNodeService {
       await this.sshClient.runCommand(
         `docker-compose -f $HOME/${this.DIR_NAME}/docker-compose.yml down`,
       );
+
+      await this.updateNodeStatus(NodeStatuses.STOPPED);
     } catch (err) {
       console.error('Error[SubspaceNodeService.stop]', err);
+
+      await this.updateNodeStatus(NodeStatuses.FAILED);
     } finally {
       await this.sshClient.close();
     }
   }
 
-  async install(node: IDBNode) {
+  async install() {
     try {
       await this.sshClient.connect(this.config);
 
-      await this.createDockerCompose(
-        node.data.nodeName,
-        node.data.walletAddress,
-      );
+      await this.createDockerCompose();
 
       await this.sshClient.runCommand('ls');
 
-      await this.updateNodeStatus(node._id);
+      await this.updateNodeStatus(NodeStatuses.INSTALLED);
     } catch (err) {
       console.error('Error[SubspaceNodeService.install]', err);
+
+      await this.updateNodeStatus(NodeStatuses.FAILED);
     } finally {
       await this.sshClient.close();
     }
@@ -100,21 +109,26 @@ export class SubspaceNodeService extends CommonNodeService {
       );
 
       await this.sshClient.runCommand('rm -rf $HOME/subspace*');
+
+      await this.deleteNode();
     } catch (err) {
       console.error('Error[SubspaceNodeService.delete]', err);
+
+      await this.updateNodeStatus(NodeStatuses.FAILED);
     } finally {
       await this.sshClient.close();
     }
   }
 
-  private async updateNodeStatus(nodeId: IDBNode['id']) {
-    await Node.findOneAndUpdate(
-      { _id: nodeId },
-      { status: NodeStatuses.INSTALLED },
-    );
+  private async updateNodeStatus(status: NodeStatuses) {
+    await Node.findOneAndUpdate({ _id: this.node._id }, { status });
   }
 
-  private async createDockerCompose(nodeName: string, walletAddress: string) {
+  private async deleteNode() {
+    await Node.deleteOne({ _id: this.node._id });
+  }
+
+  private async createDockerCompose() {
     await this.sshClient.runCommand(`mkdir -p $HOME/${this.DIR_NAME}/`);
 
     await this.sshClient.runCommand(
@@ -144,7 +158,7 @@ export class SubspaceNodeService extends CommonNodeService {
               "--dsn-disable-private-ips",
               "--no-private-ipv4",
               "--validator",
-              "--name", "${nodeName}",
+              "--name", "${this.node.data.nodeName}",
               "--telemetry-url", "wss://telemetry.subspace.network/submit 0",
               "--telemetry-url", "wss://telemetry.doubletop.io/submit 0",
               "--out-peers", "100"
@@ -169,7 +183,7 @@ export class SubspaceNodeService extends CommonNodeService {
               "--disable-private-ips",
               "--node-rpc-url", "ws://node:9944",
               "--listen-on", "/ip4/0.0.0.0/tcp/30533",
-              "--reward-address", "${walletAddress}",
+              "--reward-address", "${this.node.data.walletAddress}",
               "--plot-size", "100G"
             ]
         volumes:

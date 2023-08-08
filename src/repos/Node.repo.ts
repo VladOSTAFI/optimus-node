@@ -19,4 +19,17 @@ export class NodeRepo {
 
     return data as INode;
   }
+
+  static async run(nodeId: INode['id']) {
+    const params = new URLSearchParams({ nodeId });
+
+    await fetch(`/api/node/start?${params.toString()}`);
+  }
+
+  static async delete(nodeId: INode['id']) {
+    await fetch('/api/node', {
+      method: 'DELETE',
+      body: JSON.stringify({ nodeId }),
+    });
+  }
 }

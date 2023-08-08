@@ -1,19 +1,25 @@
 import { SSHClientService } from '@/services/SSHClient.service';
+import { IDBNode } from '@/models';
 
 export interface Config {
   host: string;
   port: number;
   username: string;
   password: string;
+
+  node: IDBNode;
 }
 
 export class CommonNodeService implements IAbstractNodeService {
   config: Config;
   sshClient: SSHClientService;
 
+  node: IDBNode;
+
   constructor(config: Config) {
     this.config = config;
     this.sshClient = new SSHClientService();
+    this.node = config.node;
   }
 
   async status() {
@@ -26,7 +32,7 @@ export class CommonNodeService implements IAbstractNodeService {
 
   async stop() {}
 
-  async install(...args: any) {}
+  async install() {}
 
   async delete() {}
 }

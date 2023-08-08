@@ -3,7 +3,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { connectToDatabase } from '@/utils';
 import { IDBNode, Node, Server } from '@/models';
 import { INode, NodeStatuses } from '@/common';
-import { NodesRegistryService } from '@/services';
+import { Config, NodesRegistryService } from '@/services';
 
 connectToDatabase();
 
@@ -60,17 +60,18 @@ export const POST = async (req: Request) => {
       data: nodeData.data,
     });
 
-    const config = {
+    const config: Config = {
       host: server.ip,
       port: 22,
       username: server.username,
       password: server.password,
+      node,
     };
 
     const NodeService = NodesRegistryService.getNodeService(node.projectId);
     const nodeService = new NodeService(config);
 
-    nodeService.install(node);
+    nodeService.install();
 
     return NextResponse.json({ data: formatNodeData(node) }, { status: 201 });
   } catch (e) {
@@ -78,6 +79,52 @@ export const POST = async (req: Request) => {
 
     return NextResponse.json(
       { message: 'Something went wrong during node creation.' },
+      { status: 500 },
+    );
+  }
+};
+
+export const DELETE = async (req: Request) => {
+  const requiredFields = ['nodeId'];
+
+  const data = await req.json();
+
+  if (requiredFields.some((key) => !data[key])) {
+    return NextResponse.json(
+      { message: 'All required field should be specified.' },
+      { status: 400 },
+    );
+  }
+
+  try {
+    const node = await Node.findOne({ _id: data.nodeId }).populate('server');
+
+    if (!node) {
+      return NextResponse.json(
+        { message: `Node with id=${data.nodeId} is not found.` },
+        { status: 400 },
+      );
+    }
+
+    const config: Config = {
+      host: node.server.ip,
+      port: 22,
+      username: node.server.username,
+      password: node.server.password,
+      node,
+    };
+
+    const NodeService = NodesRegistryService.getNodeService(node.projectId);
+    const nodeService = new NodeService(config);
+
+    nodeService.delete();
+
+    return NextResponse.json(null);
+  } catch (e) {
+    console.log(e);
+
+    return NextResponse.json(
+      { message: 'Something went wrong during node deletion.' },
       { status: 500 },
     );
   }

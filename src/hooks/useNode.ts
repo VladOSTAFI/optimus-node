@@ -28,6 +28,14 @@ export const useNode = () => {
     setNodes((prevNodes) => [...prevNodes, node]);
   }, []);
 
+  const runNode = useCallback(async (nodeId: INode['id']) => {
+    await NodeRepo.run(nodeId);
+  }, []);
+
+  const deleteNode = useCallback(async (nodeId: INode['id']) => {
+    await NodeRepo.delete(nodeId);
+  }, []);
+
   return useMemo(
     () => ({
       nodes,
@@ -36,6 +44,8 @@ export const useNode = () => {
       fetchServerNodes,
       refetchServerNodes,
       createNode,
+      runNode,
+      deleteNode,
     }),
     [
       nodes,
@@ -44,6 +54,8 @@ export const useNode = () => {
       fetchServerNodes,
       refetchServerNodes,
       createNode,
+      runNode,
+      deleteNode,
     ],
   );
 };

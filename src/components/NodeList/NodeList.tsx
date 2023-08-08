@@ -11,6 +11,8 @@ interface NodeListProps {
   isServerSelected?: boolean;
 
   onAddNode?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  onRunNode?: (nodeId: INode['id']) => void;
+  onDeleteNode?: (nodeId: INode['id']) => void;
 }
 
 const NodeList: React.FC<NodeListProps> = (props) => {
@@ -33,7 +35,9 @@ const NodeList: React.FC<NodeListProps> = (props) => {
       >
         {props.isServerSelected ? (
           <>
-            <Typography variant="h6" sx={{ marginBottom: 2 }}>No nodes in current server</Typography>
+            <Typography variant="h6" sx={{ marginBottom: 2 }}>
+              No nodes in current server
+            </Typography>
             <Button
               onClick={props.onAddNode}
               variant="outlined"
@@ -57,7 +61,11 @@ const NodeList: React.FC<NodeListProps> = (props) => {
     >
       {props.nodes.map((node) => (
         <Grid item xs={2} sm={4} md={4} key={node.id}>
-          <NodeListItem node={node} />
+          <NodeListItem
+            node={node}
+            onRun={() => props.onRunNode?.(node.id)}
+            onDelete={() => props.onDeleteNode?.(node.id)}
+          />
         </Grid>
       ))}
       <Grid item xs={2} sm={4} md={4}>

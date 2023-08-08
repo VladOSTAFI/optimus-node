@@ -44,7 +44,7 @@ export const GET = async (req: NextRequest) => {
   const NodeService = NodesRegistryService.getNodeService(node.projectId);
   const nodeService = new NodeService(config);
 
-  const status = await nodeService.status();
+  await nodeService.run();
 
-  return NextResponse.json({ data: { status } });
+  return NextResponse.json({ data: null });
 };

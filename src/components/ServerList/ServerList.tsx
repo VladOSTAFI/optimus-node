@@ -61,8 +61,9 @@ const ServerList: React.FC<ServerListProps> = (props) => {
               edge="end"
               aria-label="delete"
               onClick={() => props.onDelete(id)}
+              size="small"
             >
-              <DeleteIcon fontSize="small" />
+              <DeleteIcon fontSize="inherit" />
             </IconButton>
           }
         >
